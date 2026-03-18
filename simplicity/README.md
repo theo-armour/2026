@@ -1,6 +1,6 @@
 # Simplicity Readme
 
-* https://github.com/theo-armour/2026/blob/main/simplicity/README.md
+* <https://github.com/theo-armour/2026/blob/main/simplicity/README.md>
 
 As I write this, I'm laughing because I think I should name this folder "Epic Simplicity" - which may well be amusing, but would be a word play relating to a current action that I am very much opposed to.
 
@@ -11,5 +11,6 @@ In other words, let's do something simply wonderful. ;-)
 
 In any case, every action needs a beginning, and here is where we can start:
 
-https://theo-armour.github.io/2026/simplicity/2026-03-18-aa-ta-agenda.html
+<https://theo-armour.github.io/2026/simplicity/2026-03-18-aa-ta-agenda.html>
+
 

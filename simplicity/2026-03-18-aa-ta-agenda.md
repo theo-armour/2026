@@ -55,7 +55,8 @@ But if you have a tool, the tool is meant to be used on something. Let's talk ab
 
 As of today, there are two resources that can be worked on.
 
-[]"I have changed the world"]
+["I have changed the world"]
+
 ## Actions
 
 
