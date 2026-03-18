@@ -13,7 +13,7 @@ So here is an introduction to the tools that we're using, and why we're using th
 
 ### Why GitHub?
 
-https://github.com/
+<https://github.com/>
 
 - **Humanity's largest open knowledge repository** — GitHub hosts over 400 million repositories, making it the single biggest collection of shared human problem-solving, from operating systems to scientific research to life-saving medical tools.
 
@@ -55,10 +55,15 @@ But if you have a tool, the tool is meant to be used on something. Let's talk ab
 
 As of today, there are two resources that can be worked on.
 
-["I have changed the world"]
+Start here:
+
+<https://github.com/theo-armour/2026/tree/main/simplicity/resources>
 
 ## Actions
 
-
+TBD next time
 
 ## Results
+
+Ditto
+

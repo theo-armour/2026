@@ -21,7 +21,7 @@ And in doing so, I hope to persuade you that you can back up and look at aspects
 It is my belief that the world is mostly a good place because most people mostly do nice things. For a variety of media-driven reasons, the normal good deeds of every day life are mostly ignored. It's only the bad, horrid, and nasty things that get into the newspapers and get into the books.
 On the other hand, if we can remember back and document and just have a chat about some of the interesting things that came across our paths and we did something cool about it, that could be just as good a read as a nasty bad thing. And even better, it can be a lesson learned, an inspiration for others, The change of the world that was welcomed.
 
-
+This folder currently contains the first three versions or revisions of the story.
 
 
 
