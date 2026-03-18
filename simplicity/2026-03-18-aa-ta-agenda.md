@@ -1,5 +1,15 @@
 # 2026-03-18 AA TA Agenda
 
+## Agenda
+
+* Look at GitHub
+* Look at Markdown
+* Subscribe to GitHub
+* Create a webpage with GitHub Pages
+* Explore some of TAs projects
+
+***
+
 ## Tools
 
 Beyond the world of emails and browsers and spreadsheets and word processing, there are some actually very important tools that most people don't know about, but that are really interesting.
