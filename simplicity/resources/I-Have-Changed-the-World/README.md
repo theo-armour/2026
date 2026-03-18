@@ -2,7 +2,7 @@
 
 In 1972, Edward Lorenz presented "Predictability: Does the Flap of a Butterfly’s Wings in Brazil Set Off a Tornado in Texas?", highlighting how tiny perturbations can trigger massive, unpredictable systemic changes.
 
-(BTW, I dated Lorenzo's daughter, Nancy, in 1967.)
+(BTW, I dated Lorenz's daughter, Nancy, in 1967.)
 
 The title of this section is "I Have Changed the World". And this is, of course, true. Given Lorenz's butterfly effect, we have all changed the world.
 
