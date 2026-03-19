@@ -69,6 +69,18 @@ Start here:
 
 <https://github.com/theo-armour/2026/tree/main/simplicity/resources>
 
+### EverEverland
+
+* <https://github.com/evereverland>
+* <https://evereverland.github.io/>
+
+### Art Assets
+
+* <https://github.com/evereverland/2019/tree/master/everlandings/theo-armour>
+* <https://github.com/evereverland/2019/blob/master/everlandings/theo-armour/armour-fine-art/2020-armour-fine-art-manifest.md>
+* <https://github.com/evereverland/2019/blob/master/everlandings/theo-armour/armour-fine-art/armour-fine-art-catalog.md>
+* <https://github.com/evereverland/2019/tree/master/everlandings/theo-armour/barbara-allison-armour>
+
 ## Actions
 
 TBD next time
