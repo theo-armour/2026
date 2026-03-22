@@ -1,0 +1,458 @@
+import { useState, useRef, useCallback, useEffect } from "react";
+
+const PAUSE_MS = 550;
+const BURST_WINDOW = 5;
+
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const lerp = (a, b, t) => a + (b - a) * clamp(t, 0, 1);
+const mapR = (v, iL, iH, oL, oH) => {
+  const t = (clamp(v, iL, iH) - iL) / (iH - iL);
+  return oL + t * (oH - oL);
+};
+
+const BTN_BASE = {
+  background: "transparent",
+  border: "1px solid rgba(180,170,155,0.2)",
+  color: "rgba(235,225,210,0.5)",
+  padding: "6px 16px",
+  borderRadius: "20px",
+  fontSize: "12px",
+  letterSpacing: "0.08em",
+  cursor: "pointer",
+  transition: "all 0.25s ease",
+  fontFamily: "'Recursive', sans-serif",
+  textTransform: "uppercase",
+};
+
+const BTN_ACTIVE = {
+  ...BTN_BASE,
+  background: "rgba(196,149,106,0.15)",
+  borderColor: "rgba(196,149,106,0.4)",
+  color: "rgba(235,225,210,0.9)",
+};
+
+export default function LivingText() {
+  const [chars, setChars] = useState([]);
+  const [mode, setMode] = useState("living");
+  const [replaying, setReplaying] = useState(false);
+  const [hasFocus, setHasFocus] = useState(false);
+  const [hasTyped, setHasTyped] = useState(false);
+  const [fontReady, setFontReady] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
+
+  const boxRef = useRef(null);
+  const lastTs = useRef(null);
+  const intervals = useRef([]);
+  const savedChars = useRef([]);
+  const replayTimer = useRef(null);
+
+  useEffect(() => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href =
+      "https://fonts.googleapis.com/css2?family=Recursive:slnt,wght,CASL@-15..0,300..900,0..1&display=swap";
+    document.head.appendChild(link);
+    link.onload = () => setFontReady(true);
+    setTimeout(() => setFontReady(true), 2000);
+    return () => { try { document.head.removeChild(link); } catch(e){} };
+  }, []);
+
+  useEffect(() => {
+    if (fontReady && boxRef.current) boxRef.current.focus();
+  }, [fontReady]);
+
+  const styleLiving = useCallback((d) => {
+    const { interval, avg, accel, paused } = d;
+    const wght = mapR(interval, 50, 900, 330, 740);
+    const casl = mapR(avg, 70, 650, 0.92, 0.08);
+    const slnt = mapR(accel, -250, 250, 0, -14);
+    const sp = paused
+      ? "0.07em"
+      : `${mapR(interval, 50, 500, -0.005, 0.025).toFixed(3)}em`;
+    const w = mapR(interval, 50, 900, 0, 1);
+    const r = Math.round(lerp(245, 195, w));
+    const g = Math.round(lerp(232, 208, w));
+    const b = Math.round(lerp(210, 230, w));
+    return {
+      fontVariationSettings: `'wght' ${wght.toFixed(0)}, 'CASL' ${casl.toFixed(
+        2
+      )}, 'slnt' ${slnt.toFixed(1)}`,
+      letterSpacing: sp,
+      color: `rgb(${r},${g},${b})`,
+    };
+  }, []);
+
+  const styleStandard = {
+    fontVariationSettings: "'wght' 400, 'CASL' 0, 'slnt' 0",
+    letterSpacing: "0em",
+    color: "rgba(235,225,210,0.92)",
+  };
+
+  const charStyle = useCallback(
+    (d) => {
+      const live = mode === "living";
+      const s = live ? styleLiving(d) : styleStandard;
+      return {
+        fontFamily: "'Recursive', monospace",
+        fontSize: "inherit",
+        lineHeight: "inherit",
+        display: "inline",
+        transition: "all 0.15s ease-out",
+        ...s,
+      };
+    },
+    [mode, styleLiving]
+  );
+
+  const handleKey = useCallback(
+    (e) => {
+      if (replaying) return;
+      if (e.metaKey || e.ctrlKey) return;
+      if (e.key === "Tab") return;
+
+      const now = Date.now();
+      const iv = lastTs.current ? now - lastTs.current : 500;
+      lastTs.current = now;
+      intervals.current.push(iv);
+      if (intervals.current.length > BURST_WINDOW) intervals.current.shift();
+      const avg =
+        intervals.current.reduce((a, b) => a + b, 0) /
+        intervals.current.length;
+      const prev =
+        intervals.current.length > 1
+          ? intervals.current[intervals.current.length - 2]
+          : iv;
+      const accel = prev - iv;
+
+      if (e.key === "Backspace") {
+        e.preventDefault();
+        setChars((p) => {
+          const next = p.slice(0, -1);
+          savedChars.current = next;
+          return next;
+        });
+        return;
+      }
+
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (!hasTyped) { setHasTyped(true); setShowIntro(false); }
+        const cd = {
+          char: "\n",
+          ts: now,
+          interval: iv,
+          avg,
+          accel,
+          paused: iv > PAUSE_MS,
+        };
+        setChars((p) => {
+          const next = [...p, cd];
+          savedChars.current = next;
+          return next;
+        });
+        return;
+      }
+
+      if (e.key.length === 1) {
+        e.preventDefault();
+        if (!hasTyped) { setHasTyped(true); setShowIntro(false); }
+        const cd = {
+          char: e.key,
+          ts: now,
+          interval: iv,
+          avg,
+          accel,
+          paused: iv > PAUSE_MS,
+        };
+        setChars((p) => {
+          const next = [...p, cd];
+          savedChars.current = next;
+          return next;
+        });
+      }
+    },
+    [replaying, hasTyped]
+  );
+
+  const doReplay = useCallback(() => {
+    const src = [...savedChars.current];
+    if (src.length === 0) return;
+    setReplaying(true);
+    setChars([]);
+    let i = 0;
+    const step = () => {
+      if (i >= src.length) {
+        setReplaying(false);
+        return;
+      }
+      setChars((p) => [...p, src[i]]);
+      i++;
+      if (i < src.length) {
+        const d = Math.min(src[i].interval, 1800);
+        replayTimer.current = setTimeout(step, d);
+      } else {
+        setReplaying(false);
+      }
+    };
+    replayTimer.current = setTimeout(step, 400);
+  }, []);
+
+  const doClear = useCallback(() => {
+    if (replayTimer.current) clearTimeout(replayTimer.current);
+    setChars([]);
+    savedChars.current = [];
+    lastTs.current = null;
+    intervals.current = [];
+    setHasTyped(false);
+    setReplaying(false);
+    setShowIntro(true);
+    if (boxRef.current) boxRef.current.focus();
+  }, []);
+
+  const rendered = chars.map((c, i) => {
+    if (c.char === "\n") return <br key={i} />;
+    return (
+      <span key={i} style={charStyle(c)}>
+        {c.char}
+      </span>
+    );
+  });
+
+  const charCount = chars.filter((c) => c.char !== "\n").length;
+  const avgSpeed =
+    chars.length > 1
+      ? Math.round(
+          chars.slice(1).reduce((s, c) => s + c.interval, 0) /
+            (chars.length - 1)
+        )
+      : 0;
+
+  return (
+    <div
+      style={{
+        width: "100%",
+        minHeight: "100vh",
+        background: "linear-gradient(170deg, #0d0b09 0%, #12100d 40%, #0a0908 100%)",
+        display: "flex",
+        flexDirection: "column",
+        fontFamily: "'Recursive', sans-serif",
+      }}
+    >
+      <div
+        style={{
+          padding: "20px 28px 0",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "12px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "baseline", gap: "12px" }}>
+          <span
+            style={{
+              fontSize: "13px",
+              fontWeight: 300,
+              color: "rgba(235,225,210,0.35)",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              fontVariationSettings: "'wght' 300, 'CASL' 0.4, 'slnt' 0",
+            }}
+          >
+            Living Text
+          </span>
+          <span
+            style={{
+              fontSize: "11px",
+              color: "rgba(235,225,210,0.18)",
+              letterSpacing: "0.06em",
+            }}
+          >
+            phase one — the calligraphic channel
+          </span>
+        </div>
+
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          <button
+            style={mode === "living" ? BTN_ACTIVE : BTN_BASE}
+            onClick={() => { setMode("living"); boxRef.current?.focus(); }}
+            onMouseEnter={(e) => {
+              if (mode !== "living") e.target.style.color = "rgba(235,225,210,0.75)";
+            }}
+            onMouseLeave={(e) => {
+              if (mode !== "living") e.target.style.color = BTN_BASE.color;
+            }}
+          >
+            Living
+          </button>
+          <button
+            style={mode === "standard" ? BTN_ACTIVE : BTN_BASE}
+            onClick={() => { setMode("standard"); boxRef.current?.focus(); }}
+            onMouseEnter={(e) => {
+              if (mode !== "standard") e.target.style.color = "rgba(235,225,210,0.75)";
+            }}
+            onMouseLeave={(e) => {
+              if (mode !== "standard") e.target.style.color = BTN_BASE.color;
+            }}
+          >
+            Standard
+          </button>
+          <button
+            style={BTN_BASE}
+            onClick={doReplay}
+            disabled={replaying || chars.length === 0}
+            onMouseEnter={(e) => (e.target.style.color = "rgba(235,225,210,0.75)")}
+            onMouseLeave={(e) => (e.target.style.color = BTN_BASE.color)}
+          >
+            {replaying ? "Replaying…" : "Replay"}
+          </button>
+          <button
+            style={BTN_BASE}
+            onClick={doClear}
+            onMouseEnter={(e) => (e.target.style.color = "rgba(235,225,210,0.75)")}
+            onMouseLeave={(e) => (e.target.style.color = BTN_BASE.color)}
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <div
+        ref={boxRef}
+        tabIndex={0}
+        onKeyDown={handleKey}
+        onFocus={() => setHasFocus(true)}
+        onBlur={() => setHasFocus(false)}
+        onClick={() => boxRef.current?.focus()}
+        style={{
+          flex: 1,
+          padding: "52px 28px 24px",
+          outline: "none",
+          cursor: "text",
+          overflow: "auto",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "700px",
+            margin: "0 auto",
+            fontSize: "30px",
+            lineHeight: 1.7,
+            minHeight: "300px",
+            position: "relative",
+          }}
+        >
+          {showIntro && (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                pointerEvents: "none",
+                transition: "opacity 0.6s ease",
+                opacity: hasTyped ? 0 : 1,
+              }}
+            >
+              <p
+                style={{
+                  fontVariationSettings: "'wght' 340, 'CASL' 0.6, 'slnt' -6",
+                  color: "rgba(235,225,210,0.14)",
+                  fontSize: "30px",
+                  lineHeight: 1.7,
+                  margin: 0,
+                }}
+              >
+                {hasFocus
+                  ? "Start typing — watch your rhythm shape the letters…"
+                  : "Click anywhere to begin…"}
+              </p>
+              {!hasFocus && (
+                <p
+                  style={{
+                    fontVariationSettings: "'wght' 320, 'CASL' 0.3, 'slnt' 0",
+                    color: "rgba(235,225,210,0.09)",
+                    fontSize: "15px",
+                    lineHeight: 1.6,
+                    marginTop: "24px",
+                  }}
+                >
+                  Type fast. Type slow. Pause. Rush. The text reflects how you
+                  wrote it. Toggle between Living and Standard to feel the
+                  difference. Hit Replay to watch your thought unfold in time.
+                </p>
+              )}
+            </div>
+          )}
+
+          {rendered}
+
+          {hasFocus && !replaying && (
+            <span
+              style={{
+                display: "inline-block",
+                width: "2px",
+                height: "0.95em",
+                background: "rgba(196,149,106,0.55)",
+                marginLeft: "2px",
+                verticalAlign: "text-bottom",
+                animation: "lt-blink 1.1s step-end infinite",
+              }}
+            />
+          )}
+        </div>
+      </div>
+
+      {hasTyped && chars.length > 0 && (
+        <div
+          style={{
+            padding: "0 28px 18px",
+            display: "flex",
+            justifyContent: "center",
+            gap: "32px",
+            transition: "opacity 0.5s ease",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "11px",
+              color: "rgba(235,225,210,0.18)",
+              letterSpacing: "0.05em",
+            }}
+          >
+            {charCount} characters
+          </span>
+          <span
+            style={{
+              fontSize: "11px",
+              color: "rgba(235,225,210,0.18)",
+              letterSpacing: "0.05em",
+            }}
+          >
+            avg {avgSpeed}ms between keystrokes
+          </span>
+          <span
+            style={{
+              fontSize: "11px",
+              color: "rgba(235,225,210,0.18)",
+              letterSpacing: "0.05em",
+            }}
+          >
+            {mode === "living" ? "calligraphic channel active" : "uniform rendering"}
+          </span>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes lt-blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(235,225,210,0.1); border-radius: 2px; }
+      `}</style>
+    </div>
+  );
+}
