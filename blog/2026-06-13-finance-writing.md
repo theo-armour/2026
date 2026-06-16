@@ -25,29 +25,38 @@ Apart from an investment strategy, there is also the simple matter of good writi
 
 Here are my first thoughts off the top of my head. I'm sure this list could be expanded.And the nice thing about this is that this could be accomplished and dated by using AI.In this instance, we're using AI not to do the writing, but almost the opposite: to stop it from hallucinating by being sure that our writing is authoritative by referencing original sources.
 
-
 ### Identify the players and their position
 
-* Identify the sector And of course, important sub sector. Example: tech/component assembly
+* Identify the sector and of course, important sub sector. Example: tech/component assembly
 * Identify why that sector is interesting at this moment.
 * Identify several of the major players in that sector
 
-### Help identify things that will help you know that this is written by a human for humans.
+### Identify aspects that will help your readers know that this is written by a human for humans
 
 * The symbol of the stock should be added to the name of any company with a symbol that's of interest.
 * If the company has a Wikipedia entry, Link to its article  should also be included.
 * If there are technical terms of interest, a link to their Wikipedia entry should be included.
 
-### Other articles
+### Compare with others
 
 Identify the most popular short-term daily or monthly. Writers of Finance Articles Use AI to
 * to compare and contrast their narratives.
 * The tools they use and their general patterns of writing
 
-### Identify the tools
+### Identify the tools the others use
 
 I have not had a look at the tools for investing in a while, in decades actually.
 * What are the tools that people use to analyze stocks these days?
 * And especially, how is AI disrupting these systems?
 
+### Identify the Patterns of Writing
+
+* Single theme posts. Don't try to answer your initial question by raising more questions. If you like the theme, you will probably return to it more than once.Eventually, it will be nice to tie all the articles on this particular theme into one single chain of thought. If a post covers more than one theme or one issue or one organizationCreating a string of Arnold single-thought will be very difficult For your readers to parse and grasp.
+* Stand on the shoulders of giants. Make article EAT (Expertise, Authoritativeness, and Trustworthiness) compliant by referencing original sources and providing links to them.
+
+### Your About Page
+
+* Five Ws: Who, What, When, Where, Why. This is a good way to start your About page. It will help your readers understand who you are and why they should read your articles.
+* Media Diet: Who do you like to read? Five Ws?
+* Current Project and Interests: What are you currently interested in? This will help your readers understand what to expect from your articles.
 
